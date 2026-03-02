@@ -258,7 +258,7 @@
             </button>
             {Object.keys(STUDY).map(d=>(
               <button key={d} onClick={()=>setSelectedDomain(d)} style={{background:selectedDomain===d?PRI:"#fafafa",border:`1.5px solid ${selectedDomain===d?PRI:"#e4e4e7"}`,borderRadius:10,padding:"12px 18px",color:selectedDomain===d?"white":"#374151",fontSize:13,fontWeight:500,textAlign:"left",display:"flex",alignItems:"center",gap:10,transition:"all 0.15s"}}>
-                <Tag domain={d}/> <span style={{color:selectedDomain===d?"white":"#52525b"}}>{d}</span>
+                <Tag domain={d}/>
               </button>
             ))}
           </div>
