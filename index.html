@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CompTIA Project+ Exam Simulator 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f4f4f5; font-family: 'DM Sans', system-ui, sans-serif; color: #18181b; min-height: 100vh; }
+    button { font-family: 'DM Sans', system-ui, sans-serif; cursor: pointer; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #e4e4e7; }
+    ::-webkit-scrollbar-thumb { background: #a1a1aa; border-radius: 3px; }
+    @keyframes tick { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+    @keyframes pulseRed { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)} 50%{box-shadow:0 0 0 10px rgba(220,38,38,0)} }
+    @keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .fade-slide { animation: fadeSlide 0.22s ease forwards; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { useState, useEffect, useRef } = React;
+
+  const PRI  = "#27272a";
+  const PRI2 = "#3f3f46";
+  const ACC  = "#52525b";
+
+  const BASE_Q = [
+    // ── Domain 1: Project Basics (20q) ──────────────────────────────────────
+    {id:1,  domain:"Project Basics", question:"A project is BEST defined as:", options:["Ongoing operational work","A temporary endeavour undertaken to create a unique product, service, or result","A recurring business process","A department's annual workplan"], correct:1, explanation:"A project is temporary (defined start and end) and produces a unique deliverable — distinguishing it from ongoing operations which are repetitive and continuous."},
+    {id:2,  domain:"Project Basics", question:"Which document formally authorises a project and grants the project manager authority to apply resources?", options:["Project Management Plan","Statement of Work","Project Charter","Business Case"], correct:2, explanation:"The Project Charter formally authorises the project, names the project manager, and grants them authority to use organisational resources. It is issued by a sponsor or senior stakeholder."},
+    {id:3,  domain:"Project Basics", question:"The triple constraint in project management refers to:", options:["Time, cost, quality","Scope, schedule, cost","Risk, quality, scope","Resources, time, risk"], correct:1, explanation:"The triple constraint (iron triangle) is scope, schedule (time), and cost. Changes to one side affect the others — the PM must balance all three to deliver successfully."},
+    {id:4,  domain:"Project Basics", question:"A project sponsor's PRIMARY role is to:", options:["Manage day-to-day project activities","Provide funding, executive support, and remove organisational obstacles","Write the project schedule","Manage the project team"], correct:1, explanation:"The project sponsor champions the project at the executive level — securing resources, removing political obstacles, approving major changes, and providing strategic direction."},
+    {id:5,  domain:"Project Basics", question:"Which of the following BEST describes a programme?", options:["A very large single project","A group of related projects managed in a coordinated way to obtain benefits","All projects in an organisation","A project broken into phases"], correct:1, explanation:"A programme is a group of related projects managed together to realise benefits that would not be available if managed individually. Programme management focuses on interdependencies and shared resources."},
+    {id:6,  domain:"Project Basics", question:"A project management office (PMO) is BEST described as:", options:["The project manager's direct team","A centralised function that standardises project governance and provides support, training, and oversight","The executive board for all projects","An external consultancy firm"], correct:1, explanation:"A PMO provides centralised project governance — setting standards, templates, and methodologies, supporting PMs, maintaining the project portfolio, and reporting to leadership."},
+    {id:7,  domain:"Project Basics", question:"The project life cycle consists of which phases?", options:["Plan, Execute, Close","Initiating, Planning, Executing, Monitoring & Controlling, Closing","Start, Middle, End","Define, Design, Develop, Deploy"], correct:1, explanation:"The five process groups are Initiating, Planning, Executing, Monitoring & Controlling (which runs throughout), and Closing. These are not strictly sequential phases — they can overlap."},
+    {id:8,  domain:"Project Basics", question:"A Statement of Work (SOW) is used to:", options:["Authorise the project","Define the scope of work to be performed by a vendor or contractor","Identify project risks","Create the project schedule"], correct:1, explanation:"A SOW is a formal document describing the work to be performed by a third party — detailing deliverables, timelines, standards, and terms. It forms the basis of procurement contracts."},
+    {id:9,  domain:"Project Basics", question:"Which organisational structure gives the project manager the MOST authority?", options:["Functional","Matrix","Projectised (Project-oriented)","Balanced Matrix"], correct:2, explanation:"In a projectised organisation, the PM has full authority over the project and team. In functional organisations, the functional manager holds authority. Matrix organisations share authority between PM and functional managers."},
+    {id:10, domain:"Project Basics", question:"A functional organisational structure means:", options:["Employees report to both a PM and a functional manager","Staff are grouped by specialty and report to a functional manager — the PM has limited authority","The PM has full control over all resources","Projects are the primary way work is done"], correct:1, explanation:"In a functional structure, employees report to department heads (IT, Finance, HR). PMs have limited authority and must negotiate for resources — common in stable, process-driven organisations."},
+    {id:11, domain:"Project Basics", question:"A kick-off meeting is held to:", options:["Close the project formally","Formally start the project, align the team, and communicate goals and expectations","Review lessons learned","Approve the project budget"], correct:1, explanation:"A kick-off meeting marks the formal start of project execution — introducing the team, aligning on objectives, clarifying roles, and setting the tone for communication and collaboration."},
+    {id:12, domain:"Project Basics", question:"Which document defines the rules, roles, and working norms for the project team?", options:["Project Charter","Communications Plan","Team Charter (Ground Rules)","RACI Matrix"], correct:2, explanation:"A team charter or ground rules document establishes how the team will work together — meeting norms, decision-making processes, communication expectations, and escalation paths."},
+    {id:13, domain:"Project Basics", question:"An assumption in project management is:", options:["A known risk that has occurred","A factor considered to be true without proof for planning purposes","A constraint imposed on the project","A documented issue"], correct:1, explanation:"Assumptions are things believed to be true for planning purposes without confirmed evidence. They should be documented, tracked, and validated — if an assumption proves false, it may become a risk or issue."},
+    {id:14, domain:"Project Basics", question:"A constraint in project management is:", options:["A factor believed to be true without evidence","A limiting factor that affects the execution of the project","A potential future event that may impact the project","A change request from a stakeholder"], correct:1, explanation:"Constraints are limitations that bound the project — fixed deadlines, limited budgets, regulatory requirements, or resource availability. They restrict the PM's options and must be managed accordingly."},
+    {id:15, domain:"Project Basics", question:"Lessons learned are PRIMARILY captured during:", options:["Project initiation only","The entire project but formally during closing","Only when things go wrong","During team meetings only"], correct:1, explanation:"Lessons learned should be documented throughout the project whenever significant learning occurs — but the formal lessons learned process happens during project closing to inform future projects."},
+    {id:16, domain:"Project Basics", question:"A project milestone is:", options:["A task with a long duration","A significant point or event in the project with zero duration","A deliverable requiring many resources","A risk event"], correct:1, explanation:"Milestones mark significant points in the project — major deliverable completion, phase gate, or key decision point. They have zero duration and are used to track progress against the schedule."},
+    {id:17, domain:"Project Basics", question:"The difference between a project and operations is:", options:["Projects have larger budgets","Projects are temporary and produce unique outputs; operations are ongoing and repetitive","Operations involve more people","Projects are always strategic"], correct:1, explanation:"Projects are temporary undertakings with a defined end date producing unique results. Operations are ongoing, repetitive activities maintaining business functions — such as payroll processing or customer support."},
+    {id:18, domain:"Project Basics", question:"A project manager's PRIMARY responsibility is:", options:["Writing code or technical deliverables","Delivering the project within scope, schedule, and budget while managing stakeholders","Managing the department budget","Reporting directly to the CEO"], correct:1, explanation:"The PM is accountable for delivering the project objectives — managing scope, schedule, cost, quality, risk, communication, and stakeholder relationships to achieve the project goals."},
+    {id:19, domain:"Project Basics", question:"Which of the following is an example of a project deliverable?", options:["Weekly status meeting","A completed software application","Team timesheets","Project status report"], correct:1, explanation:"A deliverable is a tangible or intangible output produced as part of the project — such as a software application, building, report, or trained workforce. Status reports and meetings are project activities, not deliverables."},
+    {id:20, domain:"Project Basics", question:"Portfolio management involves:", options:["Managing a single large project","Selecting and managing a collection of projects and programmes aligned to strategic objectives","Managing only IT projects","Controlling the project budget"], correct:1, explanation:"Portfolio management selects, prioritises, and oversees a collection of projects and programmes to ensure they collectively deliver the organisation's strategic objectives within available resources."},
+    // ── Domain 2: Project Constraints (20q) ─────────────────────────────────
+    {id:21, domain:"Project Constraints", question:"Scope creep refers to:", options:["A planned increase in project scope","Uncontrolled changes or additions to the project scope without formal approval","Reducing project scope to save cost","Redefining the project objectives mid-project"], correct:1, explanation:"Scope creep is the gradual, unauthorised expansion of project scope — often through informal requests. It increases cost and schedule without approved changes and is managed through change control."},
+    {id:22, domain:"Project Constraints", question:"A Work Breakdown Structure (WBS) is:", options:["A project schedule showing task durations","A hierarchical decomposition of the total project scope into manageable work packages","A list of project risks","A resource allocation chart"], correct:1, explanation:"The WBS decomposes the project scope into progressively smaller components — culminating in work packages that can be estimated, assigned, and tracked. It is the foundation of the project plan."},
+    {id:23, domain:"Project Constraints", question:"The critical path in a project schedule is:", options:["The shortest path through the network","The longest path of dependent tasks — it determines the minimum project duration","The most expensive sequence of tasks","The path with the highest risk"], correct:1, explanation:"The critical path is the longest sequence of dependent activities — any delay on the critical path directly delays project completion. Activities on the critical path have zero total float."},
+    {id:24, domain:"Project Constraints", question:"Float (slack) in project scheduling means:", options:["The amount of money remaining in the contingency reserve","The amount of time a task can be delayed without delaying the project end date","The number of resources available for a task","The difference between planned and actual cost"], correct:1, explanation:"Float (or slack) is the flexibility in a task's schedule — how long it can slip before it affects the critical path or project end date. Critical path activities have zero float."},
+    {id:25, domain:"Project Constraints", question:"Which estimating technique uses historical data from similar past projects?", options:["Bottom-up estimating","Parametric estimating","Analogous estimating","Three-point estimating"], correct:2, explanation:"Analogous estimating uses actual data from similar past projects to estimate duration or cost. It is quick and useful early in the project when limited detail is available — but less accurate than bottom-up estimating."},
+    {id:26, domain:"Project Constraints", question:"Bottom-up estimating involves:", options:["Using expert judgment only","Estimating each individual work package and rolling up to the total","Using historical data from similar projects","Averaging optimistic and pessimistic estimates"], correct:1, explanation:"Bottom-up estimating breaks the work down to the smallest level (work packages or activities), estimates each one, then aggregates them upward for the total project estimate. It is the most accurate but most time-consuming method."},
+    {id:27, domain:"Project Constraints", question:"A Gantt chart is used to:", options:["Show project risks in a matrix","Visually display the project schedule — tasks, durations, dependencies, and progress over time","Calculate the project's earned value","Map stakeholder communication requirements"], correct:1, explanation:"A Gantt chart is a horizontal bar chart showing project tasks plotted against time — including task durations, dependencies, milestones, and current progress. It is the most widely used scheduling tool."},
+    {id:28, domain:"Project Constraints", question:"Resource levelling in project scheduling means:", options:["Assigning equal work to all team members","Adjusting the schedule to resolve resource over-allocation — may extend the project duration","Increasing the project budget to add more resources","Removing low-priority tasks from the schedule"], correct:1, explanation:"Resource levelling resolves conflicts where resources are over-allocated — it delays tasks or extends durations to ensure no resource is scheduled beyond their available capacity. It may extend the project end date."},
+    {id:29, domain:"Project Constraints", question:"The purpose of a project budget baseline is:", options:["To set the maximum amount that can be spent on any single task","The approved version of the time-phased budget used to measure and compare actual project cost performance","To allocate funds to each team member","To define the project profit margin"], correct:1, explanation:"The budget baseline (or cost baseline) is the approved, time-phased spending plan — used to track actual spend against planned spend and calculate earned value metrics like CPI and CV."},
+    {id:30, domain:"Project Constraints", question:"Fast tracking a project schedule means:", options:["Increasing resources to speed up critical path tasks","Performing tasks in parallel that would normally be done sequentially — accepts increased risk","Removing non-critical tasks","Reducing scope to shorten the timeline"], correct:1, explanation:"Fast tracking overlaps activities that would normally run sequentially — for example, starting construction before design is fully complete. It can shorten the schedule but increases risk and rework potential."},
+    {id:31, domain:"Project Constraints", question:"Crashing a project schedule means:", options:["Stopping the project due to budget overrun","Adding resources to critical path tasks to shorten their duration — increases cost","Removing tasks to reduce duration","Re-baselining the project schedule"], correct:1, explanation:"Crashing adds resources (people, overtime, equipment) to critical path activities to compress their duration. It reduces schedule but increases cost — the PM must find the most cost-effective crash option."},
+    {id:32, domain:"Project Constraints", question:"A project baseline includes:", options:["Only the initial cost estimate","The approved scope, schedule, and cost plan used to measure project performance","The risk register and issue log","The stakeholder communication plan"], correct:1, explanation:"The project baseline is the approved plan for scope, schedule, and cost — formally agreed at the start of execution. Changes to the baseline require formal change control approval."},
+    {id:33, domain:"Project Constraints", question:"Three-point estimating uses which values?", options:["Planned, actual, earned","Optimistic, pessimistic, most likely","Best case, worst case, average","High, medium, low"], correct:1, explanation:"Three-point estimating uses optimistic (O), pessimistic (P), and most likely (M) estimates. The PERT formula averages these: (O + 4M + P) / 6 — giving a weighted estimate that accounts for uncertainty."},
+    {id:34, domain:"Project Constraints", question:"Which dependency type means Task B cannot start until Task A finishes?", options:["Start-to-Start (SS)","Finish-to-Start (FS)","Finish-to-Finish (FF)","Start-to-Finish (SF)"], correct:1, explanation:"Finish-to-Start (FS) is the most common dependency — Task B cannot begin until Task A is complete. For example, you cannot test software (B) until development (A) is finished."},
+    {id:35, domain:"Project Constraints", question:"The project scope statement defines:", options:["The project schedule only","What is included AND excluded from the project, deliverables, and acceptance criteria","The project team structure","The project risk register"], correct:1, explanation:"The scope statement describes the project's deliverables, boundaries (what is in and out of scope), acceptance criteria, and constraints — forming the basis for detailed planning and change control."},
+    {id:36, domain:"Project Constraints", question:"Quality management in projects includes:", options:["Ensuring the project is completed under budget","Planning, assuring, and controlling quality to ensure deliverables meet requirements","Only final inspection of deliverables","Tracking team performance metrics"], correct:1, explanation:"Quality management covers quality planning (defining standards), quality assurance (auditing processes), and quality control (inspecting outputs) — ensuring deliverables meet specified requirements throughout the project."},
+    {id:37, domain:"Project Constraints", question:"A project schedule network diagram shows:", options:["The project budget breakdown","The logical sequence and dependencies between project activities","Team member availability","Stakeholder communication frequency"], correct:1, explanation:"A network diagram (e.g. Precedence Diagramming Method) shows all project activities as nodes connected by arrows representing dependencies — used to identify the critical path and calculate float."},
+    {id:38, domain:"Project Constraints", question:"Resource smoothing in scheduling:", options:["Removes resources from over-allocated tasks","Adjusts task timing within available float to optimise resource usage — does NOT extend the project end date","Adds resources to compress the schedule","Delays all non-critical tasks by the same amount"], correct:1, explanation:"Resource smoothing uses available float to shift task timing — optimising resource usage without extending the project end date. Unlike resource levelling, it preserves the critical path duration."},
+    {id:39, domain:"Project Constraints", question:"The purpose of a project change control process is to:", options:["Prevent all changes to the project","Ensure all changes are formally evaluated, approved, and documented before implementation","Allow stakeholders to request changes at any time without review","Speed up project delivery by removing approval steps"], correct:1, explanation:"Change control ensures changes are assessed for impact on scope, schedule, cost, and risk before approval. Approved changes update the baselines; unapproved changes are rejected. This prevents scope creep and budget overruns."},
+    {id:40, domain:"Project Constraints", question:"Parametric estimating uses:", options:["Expert judgment and gut feel","Statistical relationships between historical data and project variables to calculate estimates","The average of three estimates","Detailed bottom-up work package estimates"], correct:1, explanation:"Parametric estimating uses a statistical or mathematical model — for example, cost per square metre for construction, or hours per function point for software. It is more accurate than analogous estimating when reliable data exists."},
+    // ── Domain 3: Communication & Change Management (20q) ───────────────────
+    {id:41, domain:"Communication & Change", question:"A communications management plan defines:", options:["The project schedule for all team meetings","Who needs what information, when, in what format, and through which channel","The team's escalation process for risks","The project's quality standards"], correct:1, explanation:"The communications plan documents stakeholder information requirements — what information each stakeholder needs, frequency, format, channel, and responsibility for distribution. It prevents communication gaps and information overload."},
+    {id:42, domain:"Communication & Change", question:"A stakeholder register contains:", options:["Project financial data","Identified stakeholders, their interests, influence, impact, and engagement strategy","The project risk log","The project team's roles and responsibilities"], correct:1, explanation:"The stakeholder register documents all identified stakeholders — their role, interest in the project, level of influence, potential impact, and the strategy for managing their engagement."},
+    {id:43, domain:"Communication & Change", question:"Active listening in project communication means:", options:["Waiting for your turn to speak","Fully concentrating, understanding, and responding to the speaker — including verbal and non-verbal cues","Only listening to the project sponsor","Recording all meeting minutes verbatim"], correct:1, explanation:"Active listening involves giving full attention to the speaker, acknowledging what is said, asking clarifying questions, and providing feedback — it builds trust and reduces miscommunication."},
+    {id:44, domain:"Communication & Change", question:"A project status report typically includes:", options:["Technical specifications for each deliverable","Progress against plan, key accomplishments, upcoming milestones, issues, risks, and budget status","Detailed resource utilisation data only","Stakeholder contact information"], correct:1, explanation:"Status reports keep stakeholders informed of project health — covering accomplishments, schedule/cost performance, upcoming work, open issues, risks, and any needed decisions or support."},
+    {id:45, domain:"Communication & Change", question:"The number of communication channels in a project team of 5 people is:", options:["5","10","15","20"], correct:1, explanation:"Communication channels = n(n-1)/2 where n = number of people. For 5 people: 5×4/2 = 10. As teams grow, communication complexity increases rapidly — this is why larger teams need structured communication plans."},
+    {id:46, domain:"Communication & Change", question:"A change request is BEST described as:", options:["An informal verbal request from a team member","A formal document requesting a modification to the project scope, schedule, cost, or other baseline","An automatic update to the project plan","A suggestion box entry"], correct:1, explanation:"A change request is a formal document that initiates the change control process — describing the proposed change, rationale, and impact analysis. Only approved change requests update the project baselines."},
+    {id:47, domain:"Communication & Change", question:"An issue log is used to:", options:["Record potential future risks","Track and manage current problems that are actively impacting the project","Store all project documentation","Record completed project tasks"], correct:1, explanation:"An issue log records current problems — their description, priority, owner, due date, and resolution status. Unlike risks (future events), issues are happening now and require immediate management action."},
+    {id:48, domain:"Communication & Change", question:"Conflict resolution using the 'forcing' technique means:", options:["Finding a compromise where both parties give something up","One party imposes their solution, ignoring the other's concerns — wins the battle but may damage the relationship","Ignoring the conflict and hoping it resolves itself","Using a neutral mediator to facilitate resolution"], correct:1, explanation:"Forcing (competing) imposes a solution — useful when a quick decision is needed or when the issue is non-negotiable, but it can damage trust and relationships. Generally a last resort for the PM."},
+    {id:49, domain:"Communication & Change", question:"The BEST conflict resolution approach for long-term project relationships is:", options:["Avoiding the conflict","Forcing your position","Collaborating (problem solving) to find a win-win solution","Compromising where both parties lose something"], correct:2, explanation:"Collaboration (problem solving) seeks a solution that fully satisfies both parties — it takes more time but builds stronger relationships and produces the most sustainable outcomes for ongoing project teams."},
+    {id:50, domain:"Communication & Change", question:"A RACI matrix defines:", options:["Project risks and their probability","Who is Responsible, Accountable, Consulted, and Informed for each project task","Communication channels between stakeholders","The project budget breakdown by task"], correct:1, explanation:"RACI: Responsible (does the work), Accountable (owns the outcome, one person per task), Consulted (provides input), Informed (kept updated). It clarifies roles and prevents confusion about who does what."},
+    {id:51, domain:"Communication & Change", question:"Stakeholder engagement means:", options:["Sending weekly emails to all stakeholders","Proactively involving stakeholders in project decisions and managing their expectations throughout the project","Only communicating with stakeholders when problems arise","Reporting project status to the sponsor only"], correct:1, explanation:"Stakeholder engagement involves identifying needs, managing expectations, involving appropriate stakeholders in decisions, and maintaining relationships — it is ongoing throughout the project, not just at key milestones."},
+    {id:52, domain:"Communication & Change", question:"A project meeting agenda serves to:", options:["Replace the need for meeting minutes","Define the purpose, topics, time allocation, and expected outcomes of the meeting in advance","Record decisions made in the meeting","Assign action items to team members"], correct:1, explanation:"An agenda sets expectations before the meeting — ensuring attendees prepare, keeping discussion focused, managing time effectively, and ensuring all necessary topics are covered within the allotted time."},
+    {id:53, domain:"Communication & Change", question:"The purpose of a project closure report is:", options:["To start a new project","To formally document project completion, performance against objectives, lessons learned, and handover details","To request additional project funding","To record outstanding change requests"], correct:1, explanation:"The closure report summarises the project — objectives achieved, performance vs. baseline, financial summary, lessons learned, and formal handover of deliverables. It provides an auditable record and input for future projects."},
+    {id:54, domain:"Communication & Change", question:"Integrated change control means:", options:["Only the PM can approve changes","All changes are assessed for their impact across all project constraints before approval and implementation","Changes are approved by the team only","All changes are automatically approved if they are small"], correct:1, explanation:"Integrated change control assesses every change for its impact on scope, schedule, cost, quality, risk, and resources — ensuring no change is approved in isolation without understanding its full project-wide effect."},
+    {id:55, domain:"Communication & Change", question:"A project dashboard is used to:", options:["Replace the project schedule","Provide a visual summary of key project metrics and status for quick decision-making","Store all project documents","Manage team timesheets"], correct:1, explanation:"A project dashboard gives stakeholders a real-time visual overview of project health — using RAG (Red/Amber/Green) indicators, charts, and KPIs to enable quick identification of issues and informed decision-making."},
+    {id:56, domain:"Communication & Change", question:"'Management by exception' in project reporting means:", options:["The PM manages every detail personally","Only significant variances from the plan are escalated — routine updates are handled by the team","No status reports are produced","The sponsor manages the project directly"], correct:1, explanation:"Management by exception focuses leadership attention on significant deviations from the plan — freeing the PM to manage day-to-day and escalating only when tolerances are breached, such as schedule or cost variances."},
+    {id:57, domain:"Communication & Change", question:"A change control board (CCB) is responsible for:", options:["Approving the project charter","Reviewing, evaluating, and approving or rejecting project change requests","Managing day-to-day project activities","Conducting quality inspections"], correct:1, explanation:"The CCB (or change advisory board) is a formal body that reviews change requests, assesses impact, and decides whether to approve, reject, or defer. Membership typically includes the PM, sponsor, and key stakeholders."},
+    {id:58, domain:"Communication & Change", question:"The communications formula n(n-1)/2 is used to:", options:["Calculate the number of project tasks","Determine the number of potential communication channels in a project","Calculate project cost variance","Determine team size"], correct:1, explanation:"n(n-1)/2 calculates the number of two-way communication channels between n people. A team of 10 has 45 channels; a team of 20 has 190. This highlights the importance of structured communications as teams grow."},
+    {id:59, domain:"Communication & Change", question:"Organisational change management in a project context involves:", options:["Changing the organisational structure","Preparing, supporting, and guiding people through the transition from current to future state","Managing the project change control process","Restructuring the project budget"], correct:1, explanation:"Organisational change management addresses the people side of change — building awareness, desire, knowledge, ability, and reinforcement (ADKAR model) to help stakeholders adopt new ways of working."},
+    {id:60, domain:"Communication & Change", question:"A lessons learned register should be:", options:["Compiled only at project end","Updated throughout the project and formally reviewed at closure for transfer to organisational knowledge","Kept confidential within the project team","Completed only when the project fails"], correct:1, explanation:"Lessons learned should be captured in real-time throughout the project — recording what went well, what didn't, and recommendations. At closure, they are formally reviewed and shared across the organisation."},
+    // ── Domain 4: Risk & Issue Management (20q) ──────────────────────────────
+    {id:61, domain:"Risk & Issue Management", question:"A project risk is BEST defined as:", options:["A problem that has already occurred","An uncertain event or condition that, if it occurs, would have a positive or negative effect on project objectives","A stakeholder complaint","A budget overrun"], correct:1, explanation:"A risk is a future uncertainty — it may or may not occur. Risks can be threats (negative) or opportunities (positive). Once a risk occurs, it becomes an issue requiring immediate management."},
+    {id:62, domain:"Risk & Issue Management", question:"Risk probability and impact analysis is used to:", options:["Calculate the exact cost of a risk","Prioritise risks by assessing the likelihood of occurrence and the magnitude of effect on project objectives","Identify who is responsible for each risk","Create the risk response plan"], correct:1, explanation:"Probability × Impact analysis produces a risk score — used to prioritise which risks need the most attention. High probability, high impact risks require immediate response strategies."},
+    {id:63, domain:"Risk & Issue Management", question:"A risk response strategy of 'avoidance' means:", options:["Accepting the risk and setting aside contingency funds","Eliminating the threat by changing the project plan — removing the cause of the risk","Reducing the probability or impact of the risk","Shifting the financial impact to a third party"], correct:1, explanation:"Risk avoidance changes the project plan to eliminate the threat entirely — for example, choosing a different technology, changing scope, or extending the schedule to remove the risk-causing condition."},
+    {id:64, domain:"Risk & Issue Management", question:"A risk response strategy of 'mitigation' means:", options:["Accepting the risk and monitoring it","Transferring the risk to an insurance company","Reducing the probability or impact of the risk to an acceptable level","Eliminating the risk entirely by changing the plan"], correct:2, explanation:"Mitigation reduces the risk — lowering its probability of occurring or reducing its impact if it does occur. Examples include additional testing, redundant systems, or early supplier engagement."},
+    {id:65, domain:"Risk & Issue Management", question:"Risk transfer as a response strategy means:", options:["Removing the risk from the project entirely","Shifting the financial impact or ownership of the risk to a third party — e.g. insurance or fixed-price contracts","Accepting the risk without action","Reducing the probability of the risk occurring"], correct:1, explanation:"Transfer shifts the financial consequence of a risk to another party — through insurance, warranties, fixed-price contracts, or performance bonds. Note: it does not eliminate the risk, just reallocates who bears the cost."},
+    {id:66, domain:"Risk & Issue Management", question:"Risk acceptance means:", options:["Ignoring the risk completely","Acknowledging the risk and deciding not to take proactive action — either actively (with contingency) or passively","Transferring the risk to a supplier","Avoiding the risk by changing the project plan"], correct:1, explanation:"Risk acceptance acknowledges that some risks are too costly or impractical to address proactively. Active acceptance sets aside contingency reserves; passive acceptance means dealing with it if and when it occurs."},
+    {id:67, domain:"Risk & Issue Management", question:"A risk register contains:", options:["Only the top 5 project risks","All identified risks — their description, probability, impact, score, owner, response strategy, and status","The project budget contingency only","A list of issues that have already occurred"], correct:1, explanation:"The risk register is the central repository for all identified risks — tracking description, category, probability, impact, risk score, risk owner, response plan, and current status throughout the project."},
+    {id:68, domain:"Risk & Issue Management", question:"Residual risk is:", options:["A new risk identified late in the project","The risk remaining after risk responses have been applied","A risk that has become an issue","The total of all project risks"], correct:1, explanation:"Residual risk is the risk that remains after mitigation or other response actions have been implemented. It represents the remaining exposure that must be monitored and managed or accepted."},
+    {id:69, domain:"Risk & Issue Management", question:"A contingency reserve in a project budget is set aside for:", options:["General project expenses","Known risks — identifiable uncertainties where the PM plans a specific response","Unknown unknowns — risks that cannot be anticipated","Executive expenses and travel"], correct:1, explanation:"Contingency reserves address known risks (identified in the risk register). Management reserves are for unknown unknowns. Both represent risk-adjusted budget buffers that require approval to access."},
+    {id:70, domain:"Risk & Issue Management", question:"A risk owner is responsible for:", options:["Approving the project budget","Monitoring a specific risk and implementing the agreed response strategy if the risk occurs","Writing the risk register","Identifying all project risks"], correct:1, explanation:"Each risk should have a named owner — someone who has the knowledge, authority, and accountability to monitor the risk and implement the response plan if it materialises."},
+    {id:71, domain:"Risk & Issue Management", question:"A risk trigger (early warning sign) is:", options:["The event that causes the risk to occur","An indicator that a risk is about to occur — alerting the team to implement the response plan","The financial impact of the risk","The probability of the risk occurring"], correct:1, explanation:"Risk triggers are early warning indicators that signal a risk event is imminent — for example, a supplier missing a minor milestone may trigger a response plan for potential late delivery."},
+    {id:72, domain:"Risk & Issue Management", question:"Qualitative risk analysis involves:", options:["Calculating the monetary value of risks using statistics","Prioritising risks based on probability and impact using a risk matrix — fast and subjective","Running Monte Carlo simulations","Calculating the expected monetary value of each risk"], correct:1, explanation:"Qualitative risk analysis uses a probability/impact matrix to quickly categorise and prioritise risks into high/medium/low. It is faster and simpler than quantitative analysis and sufficient for most project risks."},
+    {id:73, domain:"Risk & Issue Management", question:"Quantitative risk analysis involves:", options:["Scoring risks as high, medium, or low","Using numerical methods (e.g. Monte Carlo simulation, decision trees, EMV) to assign monetary or schedule values to risks","Creating the risk register","Identifying stakeholder concerns"], correct:1, explanation:"Quantitative risk analysis models the combined effect of risks on project objectives using statistical techniques — providing a probabilistic view of cost and schedule outcomes. Used for high-stakes projects where precision matters."},
+    {id:74, domain:"Risk & Issue Management", question:"An opportunity in risk management should be:", options:["Ignored as it is not a real risk","Actively exploited, enhanced, or shared to increase the probability or impact of the positive outcome","Treated the same as a threat","Only considered if the probability is over 90%"], correct:1, explanation:"Opportunities are positive risks — the PM should actively exploit (guarantee), enhance (increase probability), or share (involve a third party to capitalise) on opportunities, just as threats are managed proactively."},
+    {id:75, domain:"Risk & Issue Management", question:"Issue escalation in a project means:", options:["Removing the issue from the log","Raising an unresolved issue to a higher management level when the PM cannot resolve it within their authority","Assigning the issue to a junior team member","Closing the issue without resolution"], correct:1, explanation:"Escalation involves referring an unresolved issue to the sponsor, steering committee, or senior stakeholder when it exceeds the PM's authority or when resolution requires executive decision-making."},
+    {id:76, domain:"Risk & Issue Management", question:"Risk appetite refers to:", options:["The total budget available for risk responses","The level of risk an organisation is willing to accept in pursuit of its objectives","The probability of the highest-rated risk","The number of risks on the register"], correct:1, explanation:"Risk appetite is the organisational tolerance for risk — how much uncertainty leadership is willing to accept. It guides risk thresholds, response strategies, and contingency reserve sizing."},
+    {id:77, domain:"Risk & Issue Management", question:"Expected Monetary Value (EMV) is calculated as:", options:["Total project cost × risk score","Probability of the risk occurring × the monetary impact if it does occur","Risk impact ÷ probability","Total contingency ÷ number of risks"], correct:1, explanation:"EMV = Probability × Impact (£/$). For example, a 30% chance of a £100k loss has an EMV of £30k. EMV is used in decision tree analysis and for sizing contingency reserves."},
+    {id:78, domain:"Risk & Issue Management", question:"A watchlist in risk management contains:", options:["High priority risks requiring immediate action","Low priority risks being monitored but not actively managed","All completed project risks","Risks that have been transferred to suppliers"], correct:1, explanation:"A watchlist includes identified risks that are currently low priority — they are monitored at regular intervals in case their status changes, without dedicating active management resources."},
+    {id:79, domain:"Risk & Issue Management", question:"Risk reviews should be conducted:", options:["Only at the start of the project","At regular intervals throughout the project — and whenever significant changes occur","Only when a risk materialises","At the end of the project only"], correct:1, explanation:"Risk reviews are ongoing — typically at each project phase, sprint, or scheduled review point. New risks are identified, existing ones re-assessed, closed risks removed, and response plans updated as the project evolves."},
+    {id:80, domain:"Risk & Issue Management", question:"Secondary risk is:", options:["The second highest rated risk on the register","A new risk created as a result of implementing a risk response","A risk that affects two project objectives","A risk carried over from a previous project"], correct:1, explanation:"Secondary risks arise from the risk response itself — for example, hiring a new contractor to mitigate a resource risk may introduce a secondary risk of onboarding delays or knowledge gaps."},
+    // ── Domain 5: Project Tools & Documentation (20q) ────────────────────────
+    {id:81, domain:"Tools & Documentation", question:"Earned Value Management (EVM) measures:", options:["Team satisfaction levels","Project performance by integrating scope, schedule, and cost — comparing what was planned vs. what was done vs. what it cost","The quality of project deliverables","Stakeholder engagement levels"], correct:1, explanation:"EVM provides objective performance data: Planned Value (PV), Earned Value (EV), and Actual Cost (AC). From these, schedule and cost variances and performance indices (SPI, CPI) are calculated."},
+    {id:82, domain:"Tools & Documentation", question:"Cost Performance Index (CPI) = 0.85 means:", options:["The project is 15% ahead of schedule","For every £1 spent, only £0.85 of planned value is being delivered — the project is over budget","The project is 15% under budget","The project is 85% complete"], correct:1, explanation:"CPI = EV/AC. CPI < 1 means over budget — spending more than the value delivered. CPI = 0.85 means for every £1 spent, only 85p of work is being delivered. A CPI > 1 is favourable."},
+    {id:83, domain:"Tools & Documentation", question:"Schedule Performance Index (SPI) = 1.1 means:", options:["The project is 10% over budget","The project is ahead of schedule — delivering 10% more value than planned at this point","The project is 10% behind schedule","The project is 10% over scope"], correct:1, explanation:"SPI = EV/PV. SPI > 1 means ahead of schedule — more work has been accomplished than was planned. SPI = 1.1 means 10% more work delivered than planned for this point in time."},
+    {id:84, domain:"Tools & Documentation", question:"A project management information system (PMIS) is:", options:["A simple spreadsheet for tracking tasks","Software tools and systems used to plan, execute, monitor, and report on project information","A communication plan template","A financial reporting system only"], correct:1, explanation:"A PMIS includes software tools for scheduling (MS Project), document management, reporting, collaboration, and financial tracking — providing an integrated platform for managing all aspects of the project."},
+    {id:85, domain:"Tools & Documentation", question:"A responsibility assignment matrix (RAM) shows:", options:["The project budget allocation","The connection between project work packages and team members — clarifying who is responsible for each deliverable","The project schedule in detail","Stakeholder communication requirements"], correct:1, explanation:"A RAM (often implemented as a RACI matrix) maps work packages to team members — showing who is responsible, accountable, consulted, and informed for each element of the project."},
+    {id:86, domain:"Tools & Documentation", question:"A project log (action items log) is used to:", options:["Record the project budget","Track specific actions, who is responsible, and the due date — ensuring follow-through on decisions made","Store all project risks","Document project lessons learned only"], correct:1, explanation:"An action log captures decisions and follow-up tasks from meetings — recording what needs to be done, who owns it, and when it is due. It ensures accountability and prevents items from falling through the cracks."},
+    {id:87, domain:"Tools & Documentation", question:"The purpose of a project schedule baseline is:", options:["To set team members' individual deadlines","The approved project schedule used as a reference point to measure schedule performance throughout the project","To replace the Gantt chart","To record actual task completion dates"], correct:1, explanation:"The schedule baseline is the approved, signed-off project schedule — used to compare planned vs. actual dates and calculate schedule variance (SV) and SPI. Changes require formal change control approval."},
+    {id:88, domain:"Tools & Documentation", question:"Cost Variance (CV) in EVM is calculated as:", options:["Actual Cost minus Planned Value","Earned Value minus Actual Cost","Planned Value minus Earned Value","Budget at Completion minus Estimate at Completion"], correct:1, explanation:"CV = EV - AC. A positive CV means under budget (spending less than the value delivered); a negative CV means over budget. CV = 0 means exactly on budget."},
+    {id:89, domain:"Tools & Documentation", question:"Schedule Variance (SV) in EVM is calculated as:", options:["Actual Duration minus Planned Duration","Earned Value minus Planned Value","Actual Cost minus Earned Value","Budget minus Actual Spend"], correct:1, explanation:"SV = EV - PV. A positive SV means ahead of schedule (more work accomplished than planned); a negative SV means behind schedule. SV = 0 means exactly on schedule."},
+    {id:90, domain:"Tools & Documentation", question:"Estimate at Completion (EAC) represents:", options:["The original approved project budget","The forecasted total cost to complete the project based on current performance","The amount spent to date","The remaining budget available"], correct:1, explanation:"EAC forecasts the total project cost based on current performance. A common formula: EAC = BAC / CPI — if you're currently over budget, the forecast assumes that trend continues for remaining work."},
+    {id:91, domain:"Tools & Documentation", question:"A project network diagram is MOST useful for:", options:["Tracking team performance","Identifying task dependencies and calculating the critical path","Reporting cost performance to stakeholders","Managing the project budget"], correct:1, explanation:"A network diagram (PDM/ADM) visually maps all project activities and their logical relationships — enabling the PM to identify the critical path, calculate float, and analyse schedule risk."},
+    {id:92, domain:"Tools & Documentation", question:"Configuration management in project management ensures:", options:["The team follows the project methodology","Product and documentation versions are controlled and changes tracked throughout the project","The project budget is properly allocated","Stakeholders are notified of all changes"], correct:1, explanation:"Configuration management controls changes to project deliverables and documentation — maintaining a version history, ensuring all team members work with the correct versions, and providing a complete audit trail."},
+    {id:93, domain:"Tools & Documentation", question:"A project kick-off meeting agenda should include:", options:["Detailed technical specifications for each deliverable","Project objectives, scope, team introductions, roles, communication plan, and next steps","The full risk register review","Detailed budget breakdown for each work package"], correct:1, explanation:"A kick-off meeting sets the project in motion — covering why (objectives), what (scope), who (roles), how (approach and communication), and what's next (immediate actions). It aligns the team and builds momentum."},
+    {id:94, domain:"Tools & Documentation", question:"A project procurement plan defines:", options:["How the project team will be recruited","What will be purchased, how suppliers will be selected, and how contracts will be managed","The project quality standards","How project risks will be managed"], correct:1, explanation:"The procurement management plan covers make-or-buy decisions, contract types, supplier selection criteria, bid processes, and contract management approach — guiding all procurement activities throughout the project."},
+    {id:95, domain:"Tools & Documentation", question:"Variance analysis in project monitoring involves:", options:["Checking team attendance records","Comparing actual performance against the baseline to identify deviations and determine their cause and impact","Setting new performance targets","Approving team expenses"], correct:1, explanation:"Variance analysis compares actual scope, schedule, and cost against the approved baseline — identifying deviations (positive or negative), analysing root causes, and determining corrective actions needed."},
+    {id:96, domain:"Tools & Documentation", question:"A project register typically includes:", options:["Only financial data","A central list of project elements such as risks, issues, changes, stakeholders, and lessons learned","The detailed project schedule","Team member performance reviews"], correct:1, explanation:"Project registers (risk register, issue log, change log, stakeholder register, lessons learned log) are living documents maintained throughout the project — providing visibility and enabling systematic management of each element."},
+    {id:97, domain:"Tools & Documentation", question:"Budget at Completion (BAC) represents:", options:["The amount spent on the project to date","The total approved budget for the entire project","The forecasted final cost based on current trends","The contingency reserve amount"], correct:1, explanation:"BAC is the total authorised budget for the project — the sum of all approved work packages. It is the baseline against which EVM metrics are calculated and actual costs are compared."},
+    {id:98, domain:"Tools & Documentation", question:"To-Complete Performance Index (TCPI) represents:", options:["The current CPI of the project","The CPI that must be achieved on remaining work to meet the budget target","The percentage of work completed","The schedule efficiency required to finish on time"], correct:1, explanation:"TCPI = (BAC - EV) / (BAC - AC). It shows the cost efficiency required to complete remaining work within budget. A TCPI > 1 means remaining work must be done more efficiently than current performance."},
+    {id:99, domain:"Tools & Documentation", question:"A project health check or project audit involves:", options:["Testing the technical deliverables","An independent review of project processes, documentation, and performance against the plan and governance standards","Reviewing team member salaries","Approving the next phase budget"], correct:1, explanation:"A project audit is an independent assessment of project health — reviewing adherence to the PM methodology, accuracy of documentation, performance trends, risk management, and governance compliance."},
+    {id:100,domain:"Tools & Documentation", question:"Benefit realisation in project management refers to:", options:["The project's financial profit margin","Measuring whether the project delivered the expected business benefits after implementation","Completing the project under budget","Calculating earned value metrics"], correct:1, explanation:"Benefit realisation tracks whether the project's intended outcomes (cost savings, revenue growth, efficiency gains) are actually achieved post-implementation — often measured months or years after project closure."},
+  ];
+
+  const QUESTIONS = [...BASE_Q];
+
+  const DC  = {"Project Basics":"#3f3f46","Project Constraints":"#52525b","Communication & Change":"#44403c","Risk & Issue Management":"#3b3a3c","Tools & Documentation":"#404040"};
+  const DBG = {"Project Basics":"#f4f4f5","Project Constraints":"#f5f5f4","Communication & Change":"#fafaf9","Risk & Issue Management":"#f4f4f5","Tools & Documentation":"#f5f5f5"};
+  const DTX = {"Project Basics":"#27272a","Project Constraints":"#292524","Communication & Change":"#1c1917","Risk & Issue Management":"#27272a","Tools & Documentation":"#262626"};
+  const DW  = {"Project Basics":13,"Project Constraints":18,"Communication & Change":16,"Risk & Issue Management":20,"Tools & Documentation":33};
+
+  const STUDY = {
+    "Project Basics":[
+      {t:"Project Definition",    b:"A project is temporary (defined start and end) and produces a unique deliverable. It differs from operations (ongoing, repetitive). Key characteristics: temporary, unique output, cross-functional team, progressive elaboration."},
+      {t:"Project Charter",       b:"Formally authorises the project and names the PM. Issued by the sponsor. Contains: project objectives, high-level scope, milestones, budget, stakeholders, and PM authority level. Required before detailed planning begins."},
+      {t:"Organisational Structures", b:"Functional: PM has low authority, resources report to functional managers. Matrix (weak/balanced/strong): shared authority. Projectised: PM has full authority, team dedicated to project. Structure impacts PM power and resource availability."},
+      {t:"Project Life Cycle",    b:"Initiating (authorise, identify stakeholders) → Planning (develop plans) → Executing (do the work) → Monitoring & Controlling (track, review, regulate — runs throughout) → Closing (formal acceptance, lessons learned, release resources)."},
+    ],
+    "Project Constraints":[
+      {t:"Triple Constraint",     b:"Scope, Schedule, Cost — the 'iron triangle'. Changes to one affect the others. Quality is sometimes added as a fourth constraint. The PM must balance all constraints to meet stakeholder expectations."},
+      {t:"WBS & Scope",           b:"WBS decomposes scope into work packages — the lowest level that can be estimated and assigned. Scope statement defines what is IN and OUT of scope. Scope creep = uncontrolled additions without change control."},
+      {t:"Schedule Techniques",   b:"Critical Path Method (CPM): identifies longest path with zero float. Fast tracking: overlap tasks (risk↑). Crashing: add resources to critical path (cost↑). Gantt chart: visual schedule. Network diagram: shows dependencies."},
+      {t:"Estimating Methods",    b:"Analogous: based on similar past project (fast, less accurate). Parametric: statistical model (e.g. £/m²). Bottom-up: estimate each work package and roll up (accurate, slow). Three-point: (O+4M+P)/6 — accounts for uncertainty."},
+    ],
+    "Communication & Change":[
+      {t:"Communications Plan",   b:"Defines: who needs what information, when, in what format, through which channel, and who is responsible. Prevents communication gaps and information overload. Reviewed and updated as stakeholders change."},
+      {t:"Stakeholder Management", b:"Stakeholder register: identifies all stakeholders, their interests, influence, and engagement strategy. Mendelow Matrix (Power/Interest): Manage Closely | Keep Satisfied | Keep Informed | Monitor. Engagement is ongoing."},
+      {t:"Change Control",        b:"All changes must go through formal change control: request → impact assessment → CCB review → approve/reject → update baselines. Integrated change control assesses impact across all constraints before approval."},
+      {t:"Conflict Resolution",   b:"Thomas-Kilmann: Avoiding, Accommodating, Competing (forcing), Compromising, Collaborating (problem solving). Collaborating is best for long-term relationships. Forcing is fastest but damages trust. Communications formula: n(n-1)/2."},
+    ],
+    "Risk & Issue Management":[
+      {t:"Risk vs Issue",         b:"Risk: uncertain future event (may or may not happen). Issue: a risk that has occurred, or any current problem impacting the project. Risks are managed proactively; issues are managed reactively. Both require owners."},
+      {t:"Risk Response Strategies", b:"Threats: Avoid (eliminate), Transfer (insurance/contract), Mitigate (reduce P or I), Accept (active=contingency, passive=deal with it). Opportunities: Exploit (guarantee), Enhance (increase P), Share, Accept."},
+      {t:"Risk Analysis",         b:"Qualitative: probability × impact matrix — fast prioritisation. Quantitative: Monte Carlo, decision trees, EMV (P × I value) — statistical modelling for high-stakes projects. Risk score = Probability × Impact."},
+      {t:"Risk Register",         b:"Contains: risk ID, description, category, probability, impact, risk score, owner, response strategy, trigger, residual risk, status. Updated continuously. Watchlist = low priority risks being monitored."},
+    ],
+    "Tools & Documentation":[
+      {t:"Earned Value Management", b:"PV (Planned Value): budgeted cost of planned work. EV (Earned Value): budgeted cost of work performed. AC (Actual Cost): actual cost incurred. CV = EV-AC (negative=over budget). SV = EV-PV (negative=behind schedule). CPI = EV/AC. SPI = EV/PV."},
+      {t:"EVM Forecasting",       b:"EAC (Estimate at Completion) = BAC/CPI. ETC (Estimate to Complete) = EAC - AC. VAC (Variance at Completion) = BAC - EAC. TCPI = (BAC-EV)/(BAC-AC). BAC = total approved budget. A TCPI > 1 means must be more efficient going forward."},
+      {t:"Project Documentation", b:"Charter → Scope Statement → WBS → Schedule → Budget → Risk Register → Communications Plan → Stakeholder Register → Change Log → Issue Log → Lessons Learned → Closure Report. Each serves a specific governance purpose."},
+      {t:"Schedule & Network",    b:"Network diagram shows activity dependencies (FS, SS, FF, SF). Critical path = longest path = zero float. Gantt chart = visual bar chart of schedule. Baseline = approved plan. Variance analysis = actual vs planned comparison."},
+    ],
+  };
+
+  function shuffle(arr){
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+  function fmt(s){
+    const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function Clock({seconds,total}){
+    const pct=seconds/total;
+    const isRed=pct<0.15,isAmber=pct<0.33;
+    const bg=isRed?"#dc2626":isAmber?"#d97706":PRI;
+    const light=isRed?"#fee2e2":isAmber?"#fef3c7":"#f4f4f5";
+    const bdr=isRed?"#fca5a5":isAmber?"#fde68a":"#d4d4d8";
+    return(
+      <div style={{display:"flex",alignItems:"center",gap:10,background:light,border:`2px solid ${bdr}`,borderRadius:10,padding:"8px 18px",animation:isRed?"pulseRed 1s infinite":"none"}}>
+        <span style={{fontSize:20}}>{isRed?"⚠️":isAmber?"⏰":"🕐"}</span>
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:600,color:bg,letterSpacing:2,animation:isRed?"tick 1s infinite":"none"}}>{fmt(seconds)}</span>
+        <span style={{fontSize:11,color:bg,fontWeight:700,opacity:0.8}}>{isRed?"URGENT":isAmber?"LOW TIME":"REMAINING"}</span>
+      </div>
+    );
+  }
+
+  function Tag({domain}){
+    return <span style={{background:DBG[domain],color:DTX[domain],border:"1px solid #e4e4e7",borderRadius:5,padding:"3px 10px",fontSize:11,fontWeight:700,flexShrink:0}}>{domain}</span>;
+  }
+
+  function Nav({screen,setScreen}){
+    if(screen==="exam") return null;
+    return(
+      <nav style={{background:"#fff",borderBottom:"1px solid #e4e4e7",padding:"0 20px",position:"sticky",top:0,zIndex:50,boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
+        <div style={{maxWidth:900,margin:"0 auto",display:"flex",alignItems:"center",height:50,gap:4}}>
+          <span style={{fontFamily:"'DM Serif Display',serif",color:PRI,fontWeight:400,fontSize:17,marginRight:16,cursor:"pointer",letterSpacing:-0.3}} onClick={()=>setScreen("home")}>Project+</span>
+          {[["home","Home"],["study","Study"],["review","Review"]].map(([s,label])=>(
+            <button key={s} onClick={()=>setScreen(s)} style={{background:screen===s?"#f4f4f5":"transparent",border:screen===s?"1px solid #d4d4d8":"1px solid transparent",borderRadius:7,padding:"6px 14px",color:screen===s?PRI:"#71717a",fontSize:13,fontWeight:500,transition:"all 0.15s"}}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </nav>
+    );
+  }
+
+  function Home({onStart,onStudy,onReview,lastResult,selectedDomain,setSelectedDomain}){
+    return(
+      <div style={{maxWidth:720,margin:"0 auto",padding:"52px 20px"}}>
+        <div style={{background:"#fff",borderRadius:16,border:"1px solid #e4e4e7",padding:"38px 42px",boxShadow:"0 2px 14px rgba(0,0,0,0.06)",marginBottom:16}}>
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:26,flexWrap:"wrap",gap:14}}>
+            <div>
+              <p style={{fontSize:11,fontWeight:700,letterSpacing:2,color:"#a1a1aa",textTransform:"uppercase",marginBottom:8}}>CompTIA Certification Prep</p>
+              <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(2rem,4vw,2.8rem)",fontWeight:400,color:"#18181b",lineHeight:1.15,letterSpacing:-0.5}}>
+                Project+<br/>Exam Simulator
+              </h1>
+              <p style={{color:"#71717a",fontSize:14,marginTop:8}}>CompTIA PK0-005 · 2026</p>
+            </div>
+            <div style={{background:PRI,color:"white",borderRadius:12,padding:"14px 22px",textAlign:"center"}}>
+              <div style={{fontSize:32,fontWeight:700,lineHeight:1}}>100</div>
+              <div style={{fontSize:11,marginTop:4,opacity:0.7}}>Questions</div>
+            </div>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:26,paddingBottom:26,borderBottom:"1px solid #f4f4f5"}}>
+            {[["⏱","90 Min","Time Limit"],["📋","100 Questions","Multiple Choice"],["✅","65%","Passing Score"]].map(([icon,val,lbl])=>(
+              <div key={lbl} style={{textAlign:"center",padding:"14px 8px",background:"#fafafa",borderRadius:10,border:"1px solid #e4e4e7"}}>
+                <div style={{fontSize:20,marginBottom:5}}>{icon}</div>
+                <div style={{fontWeight:700,fontSize:15,color:"#18181b"}}>{val}</div>
+                <div style={{fontSize:11,color:"#a1a1aa",marginTop:3}}>{lbl}</div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:1.5,color:"#a1a1aa",textTransform:"uppercase",marginBottom:12}}>Select Exam Mode</p>
+          <div style={{display:"grid",gap:8,marginBottom:22}}>
+            <button onClick={()=>setSelectedDomain("All")} style={{background:selectedDomain==="All"?PRI:"#fafafa",border:`1.5px solid ${selectedDomain==="All"?PRI:"#e4e4e7"}`,borderRadius:10,padding:"12px 18px",color:selectedDomain==="All"?"white":"#374151",fontSize:14,fontWeight:600,textAlign:"left",transition:"all 0.15s"}}>
+              🎯 Full Exam — All Domains (100 questions)
+            </button>
+            {Object.keys(STUDY).map(d=>(
+              <button key={d} onClick={()=>setSelectedDomain(d)} style={{background:selectedDomain===d?PRI:"#fafafa",border:`1.5px solid ${selectedDomain===d?PRI:"#e4e4e7"}`,borderRadius:10,padding:"12px 18px",color:selectedDomain===d?"white":"#374151",fontSize:13,fontWeight:500,textAlign:"left",display:"flex",alignItems:"center",gap:10,transition:"all 0.15s"}}>
+                <Tag domain={d}/> <span style={{color:selectedDomain===d?"white":"#52525b"}}>{d}</span>
+              </button>
+            ))}
+          </div>
+
+          <div style={{display:"grid",gap:10}}>
+            <button onClick={onStart} style={{background:PRI,color:"white",border:"none",borderRadius:10,padding:"16px 24px",fontSize:16,fontWeight:700,letterSpacing:0.3,transition:"background 0.15s"}}
+              onMouseOver={e=>e.currentTarget.style.background=PRI2}
+              onMouseOut={e=>e.currentTarget.style.background=PRI}>
+              Begin Examination →
+            </button>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              {[["📚 Study Notes",onStudy],["📖 Question Bank",onReview]].map(([lbl,fn])=>(
+                <button key={lbl} onClick={fn} style={{background:"#fafafa",border:"1px solid #e4e4e7",borderRadius:10,padding:"13px",color:"#374151",fontSize:14,fontWeight:500,transition:"background 0.15s"}}
+                  onMouseOver={e=>e.currentTarget.style.background="#f4f4f5"}
+                  onMouseOut={e=>e.currentTarget.style.background="#fafafa"}>
+                  {lbl}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {lastResult&&(
+          <div style={{background:"#fff",borderRadius:12,border:"1px solid #e4e4e7",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
+            <div>
+              <p style={{fontSize:11,color:"#a1a1aa",fontWeight:600,textTransform:"uppercase",letterSpacing:1,margin:"0 0 3px"}}>Last Attempt</p>
+              <p style={{fontSize:20,fontWeight:700,color:"#18181b",margin:0}}>{lastResult.pct.toFixed(1)}% <span style={{fontSize:14,fontWeight:400,color:"#71717a"}}>({lastResult.correct}/{lastResult.total})</span></p>
+            </div>
+            <span style={{padding:"6px 16px",borderRadius:20,fontWeight:700,fontSize:13,background:lastResult.passed?"#dcfce7":"#fee2e2",color:lastResult.passed?"#15803d":"#dc2626"}}>
+              {lastResult.passed?"✓ PASS":"✗ FAIL"}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function Study(){
+    const [domain,setDomain]=useState("Project Basics");
+    return(
+      <div style={{maxWidth:740,margin:"0 auto",padding:"32px 20px"}}>
+        <h2 style={{fontFamily:"'DM Serif Display',serif",color:"#18181b",fontSize:26,fontWeight:400,marginBottom:20,letterSpacing:-0.3}}>Study Notes</h2>
+        <div style={{display:"flex",gap:8,marginBottom:22,flexWrap:"wrap"}}>
+          {Object.keys(STUDY).map(d=>(
+            <button key={d} onClick={()=>setDomain(d)} style={{background:domain===d?PRI:"#fff",border:`1.5px solid ${domain===d?PRI:"#e4e4e7"}`,borderRadius:8,padding:"8px 16px",color:domain===d?"white":"#374151",fontSize:13,fontWeight:500,transition:"all 0.15s"}}>
+              {d}
+            </button>
+          ))}
+        </div>
+        <div style={{display:"grid",gap:12}}>
+          {STUDY[domain].map((s,i)=>(
+            <div key={i} style={{background:"#fff",border:"1px solid #e4e4e7",borderLeft:`4px solid ${PRI}`,borderRadius:"0 12px 12px 0",padding:"18px 22px",boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
+              <h4 style={{color:PRI,margin:"0 0 8px",fontSize:14,fontWeight:700}}>{s.t}</h4>
+              <p style={{color:"#52525b",margin:0,fontSize:14,lineHeight:1.8}}>{s.b}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function Review(){
+    const [filter,setFilter]=useState("All");
+    const [open,setOpen]=useState(null);
+    const filtered=filter==="All"?BASE_Q:BASE_Q.filter(q=>q.domain===filter);
+    return(
+      <div style={{maxWidth:740,margin:"0 auto",padding:"32px 20px"}}>
+        <h2 style={{fontFamily:"'DM Serif Display',serif",color:"#18181b",fontSize:26,fontWeight:400,marginBottom:20,letterSpacing:-0.3}}>Question Bank</h2>
+        <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+          {["All",...Object.keys(STUDY)].map(d=>(
+            <button key={d} onClick={()=>setFilter(d)} style={{background:filter===d?PRI:"#fff",border:`1.5px solid ${filter===d?PRI:"#e4e4e7"}`,borderRadius:8,padding:"7px 14px",color:filter===d?"white":"#374151",fontSize:12,fontWeight:500}}>
+              {d}
+            </button>
+          ))}
+        </div>
+        <div style={{display:"grid",gap:8}}>
+          {filtered.map(q=>(
+            <div key={q.id} style={{background:"#fff",border:"1px solid #e4e4e7",borderRadius:10,overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,0.04)"}}>
+              <button onClick={()=>setOpen(open===q.id?null:q.id)} style={{width:"100%",background:"none",border:"none",padding:"14px 18px",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:12}}>
+                <Tag domain={q.domain}/>
+                <span style={{color:"#374151",fontSize:13,flex:1}}>{q.question}</span>
+                <span style={{color:"#a1a1aa",fontSize:15,flexShrink:0}}>{open===q.id?"−":"+"}</span>
+              </button>
+              {open===q.id&&(
+                <div style={{padding:"0 18px 16px",borderTop:"1px solid #f4f4f5"}}>
+                  {q.options.map((opt,j)=>(
+                    <div key={j} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,marginTop:7,background:j===q.correct?"#f4f4f5":"#fafafa",border:`1px solid ${j===q.correct?"#a1a1aa":"#e4e4e7"}`}}>
+                      <span style={{fontWeight:700,fontSize:12,color:j===q.correct?PRI:"#a1a1aa",minWidth:18}}>{String.fromCharCode(65+j)}</span>
+                      <span style={{color:j===q.correct?PRI:"#71717a",fontSize:13}}>{opt}</span>
+                      {j===q.correct&&<span style={{marginLeft:"auto",color:PRI,fontSize:11,fontWeight:700}}>✓ CORRECT</span>}
+                    </div>
+                  ))}
+                  <div style={{marginTop:12,padding:"10px 14px",background:"#fffbeb",borderRadius:8,border:"1px solid #fde68a",borderLeft:"3px solid #d97706"}}>
+                    <p style={{color:"#92400e",fontSize:13,margin:0}}>💡 {q.explanation}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function Exam({onFinish,selectedDomain}){
+    const allQ = selectedDomain==="All" ? QUESTIONS : QUESTIONS.filter(q=>q.domain===selectedDomain);
+    const [questions]=useState(()=>shuffle(allQ));
+    const [current,setCurrent]=useState(0);
+    const [answers,setAnswers]=useState({});
+    const [selected,setSelected]=useState(null);
+    const [flagged,setFlagged]=useState(new Set());
+    const [showNav,setShowNav]=useState(false);
+    const [timeLeft,setTimeLeft]=useState(90*60);
+    const timerRef=useRef(null);
+    const TOTAL=90*60;
+
+    useEffect(()=>{
+      timerRef.current=setInterval(()=>{
+        setTimeLeft(s=>{
+          if(s<=1){clearInterval(timerRef.current);submit({});return 0;}
+          return s-1;
+        });
+      },1000);
+      return()=>clearInterval(timerRef.current);
+    },[]);
+
+    function submit(extra={}){
+      clearInterval(timerRef.current);
+      const final={...answers,...extra};
+      if(selected!==null) final[current]=selected;
+      const correct=questions.reduce((acc,q,i)=>acc+(final[i]===q.correct?1:0),0);
+      onFinish({correct,total:questions.length,answers:final,questions});
+    }
+
+    function go(idx){
+      const upd={...answers};
+      if(selected!==null) upd[current]=selected;
+      setAnswers(upd);
+      setSelected(upd[idx]!==undefined?upd[idx]:null);
+      setCurrent(idx);
+      setShowNav(false);
+    }
+
+    const q=questions[current];
+    const answered=Object.keys(answers).length+(selected!==null&&answers[current]===undefined?1:0);
+    const total=questions.length;
+
+    return(
+      <div style={{minHeight:"100vh",background:"#f4f4f5"}}>
+        <div style={{background:PRI,padding:"0 20px",position:"sticky",top:0,zIndex:50}}>
+          <div style={{maxWidth:900,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:60,gap:16,flexWrap:"wrap"}}>
+            <div style={{display:"flex",alignItems:"center",gap:14}}>
+              <span style={{fontFamily:"'DM Serif Display',serif",color:"white",fontWeight:400,fontSize:17,letterSpacing:-0.3}}>Project+ Exam</span>
+              <span style={{background:"rgba(255,255,255,0.15)",color:"white",borderRadius:6,padding:"3px 10px",fontSize:12,fontWeight:600}}>{current+1} / {total}</span>
+              <span style={{color:"rgba(255,255,255,0.45)",fontSize:12}}>{answered} answered</span>
+            </div>
+            <Clock seconds={timeLeft} total={TOTAL}/>
+          </div>
+          <div style={{height:3,background:"rgba(255,255,255,0.12)"}}>
+            <div style={{height:"100%",width:`${(current/total)*100}%`,background:"#a1a1aa",transition:"width 0.3s ease"}}/>
+          </div>
+        </div>
+
+        <div style={{maxWidth:860,margin:"0 auto",padding:"28px 20px 100px"}}>
+          <div style={{display:"flex",gap:10,marginBottom:18,alignItems:"center",flexWrap:"wrap"}}>
+            <Tag domain={q.domain}/>
+            <span style={{color:"#a1a1aa",fontSize:12}}>Question {current+1} of {total}</span>
+            {flagged.has(current)&&<span style={{background:"#fef3c7",color:"#92400e",border:"1px solid #fde68a",borderRadius:5,padding:"3px 10px",fontSize:11,fontWeight:700}}>🚩 Flagged</span>}
+            <span style={{marginLeft:"auto",color:"#a1a1aa",fontSize:12}}>{answered} answered</span>
+          </div>
+
+          <div className="fade-slide" key={current} style={{background:"#fff",border:"1px solid #e4e4e7",borderRadius:14,padding:"26px 30px",marginBottom:18,boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
+            <p style={{fontFamily:"'DM Serif Display',serif",color:"#18181b",fontSize:20,lineHeight:1.75,margin:0,fontWeight:400,letterSpacing:-0.2}}>{q.question}</p>
+          </div>
+
+          <div style={{display:"grid",gap:10,marginBottom:22}}>
+            {q.options.map((opt,i)=>{
+              const isSel=selected===i;
+              return(
+                <button key={i} onClick={()=>setSelected(i)} style={{
+                  width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:14,
+                  padding:"14px 18px",borderRadius:10,
+                  border:`2px solid ${isSel?PRI:"#e4e4e7"}`,
+                  background:isSel?"#f4f4f5":"#fff",cursor:"pointer",
+                  transition:"all 0.15s",boxShadow:isSel?"0 0 0 3px rgba(39,39,42,0.08)":"none"}}
+                  onMouseOver={e=>{if(!isSel){e.currentTarget.style.borderColor="#a1a1aa";e.currentTarget.style.background="#fafafa";}}}
+                  onMouseOut={e=>{if(!isSel){e.currentTarget.style.borderColor="#e4e4e7";e.currentTarget.style.background="#fff";}}}>
+                  <span style={{width:30,height:30,borderRadius:7,border:`2px solid ${isSel?PRI:"#d4d4d8"}`,background:isSel?PRI:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,color:isSel?"white":"#a1a1aa",flexShrink:0,transition:"all 0.15s"}}>
+                    {String.fromCharCode(65+i)}
+                  </span>
+                  <span style={{color:isSel?PRI:"#374151",fontSize:14,lineHeight:1.6,fontWeight:isSel?600:400}}>{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>setFlagged(s=>{const n=new Set(s);n.has(current)?n.delete(current):n.add(current);return n;})}
+              style={{background:flagged.has(current)?"#fef3c7":"#fafafa",border:`1.5px solid ${flagged.has(current)?"#fbbf24":"#e4e4e7"}`,borderRadius:8,padding:"9px 16px",color:flagged.has(current)?"#92400e":"#71717a",fontSize:13,fontWeight:500}}>
+              🚩 {flagged.has(current)?"Unflag":"Flag for Review"}
+            </button>
+            <button onClick={()=>setShowNav(s=>!s)} style={{background:"#fafafa",border:"1.5px solid #e4e4e7",borderRadius:8,padding:"9px 16px",color:"#71717a",fontSize:13,fontWeight:500}}>
+              ⊞ Navigator
+            </button>
+            <div style={{flex:1}}/>
+            {current>0&&<button onClick={()=>go(current-1)} style={{background:"#fafafa",border:"1.5px solid #e4e4e7",borderRadius:8,padding:"9px 20px",color:"#374151",fontSize:14,fontWeight:500}}>← Previous</button>}
+            {current<total-1
+              ?<button onClick={()=>go(current+1)} style={{background:PRI,border:"none",borderRadius:8,padding:"9px 24px",color:"white",fontSize:14,fontWeight:700,transition:"background 0.15s"}}
+                onMouseOver={e=>e.currentTarget.style.background=PRI2}
+                onMouseOut={e=>e.currentTarget.style.background=PRI}>Next Question →</button>
+              :<button onClick={()=>submit()} style={{background:"#15803d",border:"none",borderRadius:8,padding:"9px 24px",color:"white",fontSize:14,fontWeight:700}}
+                onMouseOver={e=>e.currentTarget.style.background="#166534"}
+                onMouseOut={e=>e.currentTarget.style.background="#15803d"}>✓ Submit Exam</button>
+            }
+          </div>
+
+          {showNav&&(
+            <div style={{marginTop:20,background:"#fff",border:"1px solid #e4e4e7",borderRadius:14,padding:"20px 22px",boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
+              <p style={{color:"#a1a1aa",fontSize:11,margin:"0 0 14px",textTransform:"uppercase",letterSpacing:1.5,fontWeight:700}}>Question Navigator</p>
+              <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:14}}>
+                {questions.map((_,i)=>{
+                  const isDone=answers[i]!==undefined||(i===current&&selected!==null);
+                  const isCur=i===current,isFlag=flagged.has(i);
+                  return(
+                    <button key={i} onClick={()=>go(i)} style={{width:33,height:33,borderRadius:7,fontSize:10,fontWeight:700,
+                      background:isCur?PRI:isDone?"#e4e4e7":"#fafafa",
+                      border:`1.5px solid ${isCur?PRI:isFlag?"#fbbf24":isDone?"#a1a1aa":"#e4e4e7"}`,
+                      color:isCur?"white":isDone?PRI:"#a1a1aa"}}>
+                      {i+1}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{display:"flex",gap:16,fontSize:11,flexWrap:"wrap"}}>
+                <span style={{color:PRI,fontWeight:600}}>■ Current</span>
+                <span style={{color:ACC,fontWeight:600}}>■ Answered</span>
+                <span style={{color:"#d97706",fontWeight:600}}>■ Flagged</span>
+                <span style={{color:"#a1a1aa"}}>□ Unanswered</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function Results({result,onRetry,onHome}){
+    const {correct,total,answers,questions}=result;
+    const pct=(correct/total)*100,passed=pct>=65;
+    const [showWrong,setShowWrong]=useState(false);
+
+    const ds={};
+    questions.forEach((q,i)=>{
+      if(!ds[q.domain]) ds[q.domain]={c:0,t:0};
+      ds[q.domain].t++;
+      if(answers[i]===q.correct) ds[q.domain].c++;
+    });
+    const wrong=questions.map((q,i)=>({q,i,yours:answers[i]})).filter(x=>x.yours!==x.q.correct);
+
+    return(
+      <div style={{maxWidth:720,margin:"0 auto",padding:"44px 20px"}}>
+        <div style={{background:"#fff",borderRadius:16,border:"1px solid #e4e4e7",padding:"36px 40px",boxShadow:"0 2px 14px rgba(0,0,0,0.06)",marginBottom:14,textAlign:"center"}}>
+          <div style={{fontSize:52,marginBottom:12}}>{passed?"🎉":"📊"}</div>
+          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(1.6rem,4vw,2.4rem)",color:"#18181b",margin:"0 0 6px",fontWeight:400,letterSpacing:-0.3}}>{passed?"Examination Passed":"Examination Complete"}</h2>
+          <p style={{color:"#71717a",fontSize:15,margin:"0 0 28px"}}>{passed?"Congratulations — you met the 65% passing threshold.":"You need 65% to pass. Review your weak domains below."}</p>
+          <div style={{display:"inline-flex",alignItems:"center",gap:24,background:passed?"#f0fdf4":"#fef2f2",border:`2px solid ${passed?"#86efac":"#fca5a5"}`,borderRadius:14,padding:"20px 36px"}}>
+            <div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:48,fontWeight:600,color:passed?"#15803d":"#dc2626",lineHeight:1}}>{pct.toFixed(1)}%</div>
+              <div style={{color:"#71717a",fontSize:13,marginTop:5}}>{correct} of {total} correct</div>
+            </div>
+            <div style={{width:1,height:52,background:passed?"#86efac":"#fca5a5"}}/>
+            <div>
+              <div style={{fontWeight:800,fontSize:20,color:passed?"#15803d":"#dc2626"}}>{passed?"PASS":"FAIL"}</div>
+              <div style={{color:"#71717a",fontSize:12,marginTop:3}}>Threshold: 65%</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{background:"#fff",borderRadius:14,border:"1px solid #e4e4e7",padding:"24px 28px",marginBottom:12,boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:18,color:"#18181b",margin:"0 0 18px",fontWeight:400}}>Domain Breakdown</h3>
+          {Object.entries(ds).map(([domain,stat])=>{
+            const dp=(stat.c/stat.t)*100;
+            return(
+              <div key={domain} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+                <Tag domain={domain}/>
+                <div style={{flex:1,height:10,background:"#f4f4f5",borderRadius:5,overflow:"hidden"}}>
+                  <div style={{width:`${dp}%`,height:"100%",background:PRI,borderRadius:5}}/>
+                </div>
+                <span style={{fontWeight:700,fontSize:13,color:"#374151",minWidth:42,textAlign:"right"}}>{dp.toFixed(0)}%</span>
+                <span style={{color:"#a1a1aa",fontSize:12,minWidth:36}}>{stat.c}/{stat.t}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <button onClick={()=>setShowWrong(s=>!s)} style={{width:"100%",background:"#fff",border:"1px solid #e4e4e7",borderRadius:10,padding:"13px 20px",color:"#374151",fontSize:14,fontWeight:500,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",boxShadow:"0 1px 3px rgba(0,0,0,0.04)"}}>
+          <span>Review Incorrect Answers ({wrong.length})</span>
+          <span style={{color:"#a1a1aa"}}>{showWrong?"▲":"▼"}</span>
+        </button>
+
+        {showWrong&&(
+          <div style={{display:"grid",gap:10,marginBottom:14}}>
+            {wrong.map(({q,i,yours})=>(
+              <div key={i} style={{background:"#fff",border:"1px solid #fca5a5",borderRadius:10,padding:"16px 18px"}}>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10,flexWrap:"wrap"}}>
+                  <Tag domain={q.domain}/>
+                  <p style={{color:"#18181b",fontSize:13,margin:0,lineHeight:1.6,fontWeight:500,width:"100%"}}>{q.question}</p>
+                </div>
+                <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+                  <span style={{fontSize:12,padding:"4px 10px",borderRadius:6,background:"#fee2e2",color:"#dc2626",border:"1px solid #fca5a5",fontWeight:500}}>✗ {yours!==undefined?q.options[yours]:"Not answered"}</span>
+                  <span style={{fontSize:12,padding:"4px 10px",borderRadius:6,background:"#dcfce7",color:"#15803d",border:"1px solid #86efac",fontWeight:500}}>✓ {q.options[q.correct]}</span>
+                </div>
+                <div style={{background:"#fffbeb",border:"1px solid #fde68a",borderLeft:"3px solid #d97706",borderRadius:"0 8px 8px 0",padding:"9px 13px"}}>
+                  <p style={{color:"#78350f",fontSize:12,margin:0}}>💡 {q.explanation}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <button onClick={onRetry} style={{background:PRI,border:"none",borderRadius:10,padding:"15px",color:"white",fontSize:15,fontWeight:700,transition:"background 0.15s"}}
+            onMouseOver={e=>e.currentTarget.style.background=PRI2}
+            onMouseOut={e=>e.currentTarget.style.background=PRI}>Retake Exam</button>
+          <button onClick={onHome} style={{background:"#fafafa",border:"1px solid #e4e4e7",borderRadius:10,padding:"15px",color:"#374151",fontSize:15,fontWeight:500}}>← Back to Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  function App(){
+    const [screen,setScreen]=useState("home");
+    const [result,setResult]=useState(null);
+    const [lastResult,setLastResult]=useState(null);
+    const [selectedDomain,setSelectedDomain]=useState("All");
+
+    function handleFinish(r){
+      const pct=(r.correct/r.total)*100;
+      setLastResult({...r,pct,passed:pct>=65});
+      setResult(r);
+      setScreen("results");
+    }
+
+    return(
+      <div style={{minHeight:"100vh",background:"#f4f4f5"}}>
+        <Nav screen={screen} setScreen={setScreen}/>
+        {screen==="home"    && <Home onStart={()=>setScreen("exam")} onStudy={()=>setScreen("study")} onReview={()=>setScreen("review")} lastResult={lastResult} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain}/>}
+        {screen==="study"   && <Study/>}
+        {screen==="review"  && <Review/>}
+        {screen==="exam"    && <Exam onFinish={handleFinish} selectedDomain={selectedDomain}/>}
+        {screen==="results" && result && <Results result={result} onRetry={()=>setScreen("exam")} onHome={()=>setScreen("home")}/>}
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
